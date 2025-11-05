@@ -1,0 +1,14 @@
+{
+  "name": "compulab",
+  "version": "1.0.0",
+  "description": "Modelos y simuladores cientificos utilizando computacion. Simular para comprender la realidad",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Diego Goñas",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^5.3.8"
+  }
+}

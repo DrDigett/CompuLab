@@ -1,0 +1,17 @@
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+canvas {
+    border: 1px solid #444;
+    display: block;
+    margin: 0 auto;
+    background-color: #000;
+}
+input[type="range"] {
+    width: 100%;
+}
+.param-label {
+    color: #bbb;
+    font-size: 0.9rem;
+}

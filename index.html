@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>CompuLab+</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    </head>
+    <body>
+        <nav class="navbar bg-dark navbar-expand-lg" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">CompuLab+</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link" href="sobre.html">Sobre el proyecto</a>
+                </li>
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="modelos.html" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                   Modelos
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="./modelos/Lotka-Volterra.html">Lokta-Volterra</a></li>
+                </ul>
+                </li>
+            </ul>
+            </div>
+        </div>
+        </nav>
+
+        
+        <main class="container py-5">
+            <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+                <div class="container-fluid py-3">
+                <h1 class="display-5 fw-bold">Abstrayendo la realidad para comprenderla</h1>
+                <p class="col-md-8 fs-5">Modelos científicos utilizando herramientas de programación (🐍Python y 👨🏻‍💻JavaScript)</p>
+                <a type="button" class="btn btn-dark" href="modelos.html">Modelos</a>
+                </div>
+            </div>
+
+            <section class="my-4">
+            <div class="p-4 bg-white rounded shadow-sm">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h2 class="h3 fw-bold">Ecuaciones de Lotka-Volterra</h2>
+                        <p class="mb-3">
+                            Son ecuaciones diferenciales no lineales de primer orden que modelan la dinámica entre dos 
+                            especies en interacción (depredador y presa) y con ellas podemos entender cómo varían sus poblaciones a lo largo del tiempo.
+                        </p>
+                        <a type="button" class="btn btn-dark mt-2" href="modelos/Lotka-Volterra.html">Ver Mas...</a>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5xIvckQYq8GBP2-plRQaCtqyzwhyFpYsw2g&s" alt="Diagrama Lotka-Volterra" class="img-fluid rounded" style="max-height:260px; object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+            </section>
+        </main> 
+        <footer class="bg-light text-center py-3">
+            <div class="container">
+                <small class="text-muted">Autor: Diego Goñas. revisa mi repositorio</small>
+            </div>
+        </footer>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    </body>
+</html>
