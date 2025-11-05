@@ -8,22 +8,22 @@
   let rafId = null;
   let paused = true;
 
-  // Parámetros LV
-  let prey_reproduction = 0.4;
-  let prey_death = 0.2;
-  let predator_reproduction = 0.8;
-  let predator_death = 0.1;
-  let pred_requirement = 2;
+  // Parámetros LV (por defecto)
+  let prey_reproduction = 0.4;   // alpha
+  let prey_death = 0.2;         // mu
+  let predator_reproduction = 0.8; // delta (eficiencia)
+  let predator_death = 0.1;     // gamma
+  let pred_requirement = 2;     // coef. interacción (beta escala interna)
 
   // Poblaciones continuas (flotantes)
-  let P = 0; // presas
-  let D = 0; // depredadores
+  let P = 0; // presas (continuo)
+  let D = 0; // depredadores (continuo)
 
-  // Rango aleatorio inicial (puedes ajustar)
-  const PREY_MIN = 300, PREY_MAX = 1000;
-  const PRED_MIN = 200, PRED_MAX = 1500;
+  // Rangos aleatorios iniciales (solo para la semilla; luego la densidad visual se controla)
+  const PREY_MIN = 50, PREY_MAX = 600;
+  const PRED_MIN = 10, PRED_MAX = 300;
 
-  // UI
+  // UI elementos
   let prey_num_display, pred_num_display, time_display;
   let prey_rep_input, prey_ded_input, pred_rep_input, pred_ded_input, pred_req_input;
   let prey_rep_display, prey_ded_display, pred_rep_display, pred_ded_display, pred_req_display;
@@ -42,31 +42,39 @@
     return array;
   }
 
+  // Distribuye una cantidad total pequeña de posiciones en la grilla
   function distributePopulations(preyCount, predCount) {
     grid = newGrid();
     const coords = [];
     for (let i = 0; i < length; i++) for (let j = 0; j < length; j++) coords.push([i, j]);
     shuffle(coords);
     let idx = 0;
+    // Colocar presas (valor 1)
     for (let k = 0; k < Math.min(preyCount, coords.length); k++, idx++) {
       const [i, j] = coords[idx];
       grid[i][j] = 1;
     }
+    // Colocar depredadores (valor 2)
     for (let k = 0; k < Math.min(predCount, coords.length - idx); k++, idx++) {
       const [i, j] = coords[idx];
       grid[i][j] = 2;
     }
   }
 
+  // Calcula coeficiente de interacción beta escalado al área
   function computeInteractionCoefficient() {
     const area = Math.max(1, length * length);
+    // pred_requirement ya es una especie de "intensidad" — la dividimos por el area para que el producto p*d tenga sentido
     return pred_requirement / area;
   }
 
   // ---- Runge-Kutta 4 ----
   function derivs(p, d, params) {
     const { alpha, mu, beta, delta, gamma } = params;
-    const dP = (alpha - mu) * p - beta * p * d;
+    // Ecuaciones Lotka-Volterra con términos naturales:
+    // dP/dt = alpha * P - beta * P * D - mu * P
+    // dD/dt = delta * beta * P * D - gamma * D
+    const dP = alpha * p - beta * p * d - mu * p;
     const dD = delta * beta * p * d - gamma * d;
     return [dP, dD];
   }
@@ -89,8 +97,20 @@
     P = P + (dt / 6) * (k1P + 2 * k2P + 2 * k3P + k4P);
     D = D + (dt / 6) * (k1D + 2 * k2D + 2 * k3D + k4D);
 
+    // No permitimos negativos
     if (P < 0) P = 0;
     if (D < 0) D = 0;
+
+    // Garantizar que siempre haya más presas que depredadores en los valores continuos:
+    // Si D >= P, forzamos D a ser ligeramente menor que P (manteniendo dinámica pero respetando tu requerimiento).
+    if (P <= 0 && D > 0) {
+      // si no hay presas, depredadores deben extinguirse
+      D = 0;
+    } else if (D >= P) {
+      // reduce D a P - epsilon (al menos 1 individuo en la representación continua si P>=1)
+      const eps = Math.max(0.5, 0.01 * P);
+      D = Math.max(0, P - eps);
+    }
   }
 
   // --- render ---
@@ -101,8 +121,8 @@
     for (let i = 0; i < length; i++) {
       for (let j = 0; j < length; j++) {
         const v = grid[i][j];
-        if (v === 1) ctx.fillStyle = "#40ff00";
-        else if (v === 2) ctx.fillStyle = "#ff4444";
+        if (v === 1) ctx.fillStyle = "#40ff00";        // presas
+        else if (v === 2) ctx.fillStyle = "#ff4444";   // depredadores
         else continue;
         ctx.fillRect(i * pixel_size, j * pixel_size, pixel_size, pixel_size);
       }
@@ -116,18 +136,53 @@
       rk4Step(dt);
       time += dt;
 
+      // Convertir las abundancias continuas P y D a una distribución visual reducida
       const maxCells = length * length;
-      const Pcells = Math.min(Math.round(P), maxCells);
-      const Dcells = Math.min(Math.round(D), maxCells - Pcells);
+
+      // Queremos dibujar poca densidad para que se vean "menos números" en el canvas:
+      const maxOccupancyFraction = 0.12; // 12% de celdas como máximo ocupadas (ajusta aquí)
+      const totalDesiredCells = Math.max(1, Math.min(Math.round(maxCells * maxOccupancyFraction), Math.round(P + D) || 1));
+
+      // Si P+D es muy grande, escalamos proporcionalmente:
+      let Pcells = 0, Dcells = 0;
+      if (P + D > 0.0001) {
+        Pcells = Math.round((P / (P + D)) * totalDesiredCells);
+        Dcells = totalDesiredCells - Pcells;
+      } else {
+        Pcells = 0; Dcells = 0;
+      }
+
+      // Garantizar que siempre haya más celdas de presas que de depredadores visualmente:
+      if (Pcells <= Dcells) {
+        // Aseguramos Pcells >= Dcells + 1 cuando sea posible
+        const need = (Dcells + 1) - Pcells;
+        Pcells += need;
+        // reducir total si excede capacidad
+        if (Pcells + Dcells > maxCells) {
+          const overflow = Pcells + Dcells - maxCells;
+          // reducir ambos proporcionalmente
+          const reducePred = Math.min(Dcells, overflow);
+          Dcells -= reducePred;
+          if (Pcells + Dcells > maxCells) {
+            Pcells = Math.max(0, maxCells - Dcells);
+          }
+        }
+      }
+
+      // Asegurar límites
+      Pcells = Math.min(Pcells, maxCells);
+      Dcells = Math.min(Dcells, Math.max(0, maxCells - Pcells));
+
       distributePopulations(Pcells, Dcells);
     }
 
+    // corregir conteos: en grid 1=presa, 2=depredador
     const flat = grid.flat();
-    const preyDisplay = flat.filter(x => x === 2).length;
-    const predDisplay = flat.filter(x => x === 1).length;
+    const preyDisplay = flat.filter(x => x === 1).length;
+    const predDisplay = flat.filter(x => x === 2).length;
 
-    if (prey_num_display) prey_num_display.textContent = `Presas: ${preyDisplay}  (P≈${P.toFixed(1)})`;
-    if (pred_num_display) pred_num_display.textContent = `Depredadores: ${predDisplay}  (D≈${D.toFixed(1)})`;
+    if (prey_num_display) prey_num_display.textContent = `Presas (celdas): ${preyDisplay}  — P≈${P.toFixed(1)}`;
+    if (pred_num_display) pred_num_display.textContent = `Depredadores (celdas): ${predDisplay}  — D≈${D.toFixed(1)}`;
     if (time_display) time_display.textContent = `Tiempo: ${time.toFixed(1)}`;
 
     render();
@@ -154,23 +209,42 @@
     }
   }
 
-  // --- inicialización con valores aleatorios ---
+  // --- inicialización con valores aleatorios (y garantizando P > D) ---
   function initSimulationRandom() {
+    // Semilla aleatoria
     const randPrey = Math.floor(Math.random() * (PREY_MAX - PREY_MIN + 1)) + PREY_MIN;
-    const randPred = Math.floor(Math.random() * (PRED_MAX - PRED_MIN + 1)) + PRED_MIN;
+    // Aseguramos depredadores menores que presas al inicio
+    const maxPredStart = Math.min(randPrey - 1, PRED_MAX);
+    const minPredStart = Math.min(PRED_MIN, Math.max(0, maxPredStart));
+    let randPred = 0;
+    if (maxPredStart > minPredStart) {
+      randPred = Math.floor(Math.random() * (maxPredStart - minPredStart + 1)) + minPredStart;
+    } else {
+      randPred = Math.floor(Math.random() * (Math.max(1, Math.floor(randPrey * 0.5)))); // fallback
+    }
 
-    P = randPrey;
-    D = randPred;
+    P = Math.max(1, randPrey);
+    D = Math.max(0, randPred);
 
-    distributePopulations(
-      Math.min(randPrey, length * length),
-      Math.min(randPred, length * length)
-    );
+    // Distribución visual inicial: usamos reglas de densidad baja
+    const maxCells = length * length;
+    const occupancyFrac = 0.12; // 12% como máximo
+    const totalDesiredCells = Math.max(1, Math.min(Math.round(maxCells * occupancyFrac), Math.round(P + D) || 1));
+    let Pcells = Math.round((P / (P + D || 1)) * totalDesiredCells);
+    let Dcells = totalDesiredCells - Pcells;
+    if (Pcells <= Dcells) {
+      Pcells = Dcells + 1;
+      if (Pcells + Dcells > maxCells) {
+        Pcells = Math.max(1, Math.floor(maxCells * 0.08));
+        Dcells = Math.max(0, Math.floor(maxCells * 0.02));
+      }
+    }
+
+    distributePopulations(Math.min(Pcells, maxCells), Math.min(Dcells, Math.max(0, maxCells - Pcells)));
     time = 0;
 
-    // Mostrar en HTML los valores iniciales
-    if (prey_num_display) prey_num_display.textContent = `Presas: ${randPrey}`;
-    if (pred_num_display) pred_num_display.textContent = `Depredadores: ${randPred}`;
+    if (prey_num_display) prey_num_display.textContent = `Presas (celdas): ${Math.min(P, maxCells)}  — P≈${P.toFixed(1)}`;
+    if (pred_num_display) pred_num_display.textContent = `Depredadores (celdas): ${D}  — D≈${D.toFixed(1)}`;
   }
 
   function initParams() {
@@ -194,11 +268,12 @@
   }
 
   function defaultParams() {
-    prey_rep_input.value = 0.4;
-    prey_ded_input.value = 0.2;
-    pred_rep_input.value = 0.8;
-    pred_ded_input.value = 0.1;
-    pred_req_input.value = 2;
+    // Actualiza inputs (si existen en DOM)
+    if (prey_rep_input) prey_rep_input.value = 0.4;
+    if (prey_ded_input) prey_ded_input.value = 0.2;
+    if (pred_rep_input) pred_rep_input.value = 0.8;
+    if (pred_ded_input) pred_ded_input.value = 0.1;
+    if (pred_req_input) pred_req_input.value = 2;
     updateParams("prey-rep");
     updateParams("prey-ded");
     updateParams("pred-rep");
@@ -220,7 +295,7 @@
 
   function resetSimulation() {
     if (rafId) cancelAnimationFrame(rafId);
-    startBtn.disabled = false;
+    if (startBtn) startBtn.disabled = false;
     paused = true;
     time = 0;
     initSimulationRandom();
