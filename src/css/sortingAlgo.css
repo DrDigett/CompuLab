@@ -1,0 +1,37 @@
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+canvas {
+    border: 1px solid #444;
+    display: block;
+    margin: 0 auto;
+    background-color: #000;
+}
+input[type="range"] {
+    width: 100%;
+}
+.param-label {
+    color: #bbb;
+    font-size: 0.9rem;
+}
+/* 🎨 Ajuste visual del canvas */
+#canvas {
+    width: 100%;
+    max-width: 700px;
+    aspect-ratio: 7 / 4; /* mantiene proporción */
+    background: #111;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+/* 📱 Ajustes responsivos extras */
+@media (max-width: 768px) {
+    #canvas {
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+    }
+    h5#selected-title {
+    font-size: 1rem;
+    }
+}
