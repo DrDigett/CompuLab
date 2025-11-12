@@ -11,103 +11,84 @@
 </head>
 
 <body>
-    <nav class="navbar bg-dark navbar-expand-lg" data-bs-theme="dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">CompuLab+</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNavDropdown">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="../index.html">Home</a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="../sobre.html">Sobre el proyecto</a>
-                </li>
-                <li class="nav-item ">
-                <a class="nav-link active" href="#">Lokta Volterra</a>
-                </li>
-            </ul>
-            </div>
-        </div>
-    </nav>
+  <div data-component="header"></div>
 
-    <section class="py-3">
-    <div class="container">
-        <div class="row">
-      <!-- Canvas -->
-      <div class="col-lg-8 col-12 mb-3">
-        <canvas id="canvas"></canvas>
-        <div class="text-center mt-2">
-          <span class="badge bg-primary" id="time-display">Tiempo: 0.0</span>
-        </div>
+  <section class="py-3">
+  <div class="container">
+      <div class="row">
+    <!-- Canvas -->
+    <div class="col-lg-8 col-12 mb-3">
+      <canvas id="canvas"></canvas>
+      <div class="text-center mt-2">
+        <span class="badge bg-primary" id="time-display">Tiempo: 0.0</span>
       </div>
-
-      <!-- Controles -->
-      <div class="col-lg-4 col-12 text-center">
-        <button id="start-button" class="btn btn-success">Iniciar</button>
-        <button id="pause-button" class="btn btn-warning me-2" onclick="pauseToggle()">Pausar</button>
-        <button class="btn btn-danger" onclick="location.reload()">Reiniciar</button>
-        <hr>
-        <div id="prey-num"></div>
-        <div id="pred-num"></div>
-        <p class="text-secondary small mt-2">Reinicia si una población desaparece.</p>
-        <hr>
-
-        <!-- Sliders -->
-        <div class="text-start">
-          <div class="mb-2">
-            <span id="prey-rep-display" class="param-label"></span>
-            <input id="prey-rep-input" type="range" min="0" max="1" step="0.1"
-                   oninput="updateParams('prey-rep')" onchange="updateParams('prey-rep')" />
-          </div>
-          <div class="mb-2">
-            <span id="prey-ded-display" class="param-label"></span>
-            <input id="prey-ded-input" type="range" min="0" max="1" step="0.1"
-                   oninput="updateParams('prey-ded')" onchange="updateParams('prey-ded')" />
-          </div>
-          <div class="mb-2">
-            <span id="pred-rep-display" class="param-label"></span>
-            <input id="pred-rep-input" type="range" min="0" max="1" step="0.1"
-                   oninput="updateParams('pred-rep')" onchange="updateParams('pred-rep')" />
-          </div>
-          <div class="mb-2">
-            <span id="pred-ded-display" class="param-label"></span>
-            <input id="pred-ded-input" type="range" min="0" max="1" step="0.1"
-                   oninput="updateParams('pred-ded')" onchange="updateParams('pred-ded')" />
-          </div>
-          <div class="mb-2">
-            <span id="pred-req-display" class="param-label"></span>
-            <input id="pred-req-input" type="range" min="1" max="4" step="1"
-                   oninput="updateParams('pred-req')" onchange="updateParams('pred-req')" />
-          </div>
-        </div>
-      </div>
-        </div>
     </div>
-    </section>
-    <section class="d-flex justify-content-center align-items-center py-5">
-      <div class="card bg-secondary text-light border-0 shadow-lg rounded-4 p-4" style="max-width: 600px;">
-        <div class="card-body text-center">
-          <h4 class="card-title mb-3">🐹🦁 Cuyes y Pumas: Modelo Lotka–Volterra</h4>
-          <p class="card-text text-light-50">
-            Este modelo muestra la relación entre <strong>cuyes</strong> (presas de color verde) y 
-            <strong>pumas</strong> (depredadores de color rojo).  
-            Cuando los cuyes abundan, los pumas prosperan; pero si escasean, los pumas disminuyen.  
-            Así surgen ciclos naturales donde ambas poblaciones crecen y decrecen, 
-            revelando el <em>equilibrio ecológico</em> del ecosistema.
-          </p>
+
+    <!-- Controles -->
+    <div class="col-lg-4 col-12 text-center">
+      <button id="start-button" class="btn btn-success">Iniciar</button>
+      <button id="pause-button" class="btn btn-warning me-2" onclick="pauseToggle()">Pausar</button>
+      <button class="btn btn-danger" onclick="location.reload()">Reiniciar</button>
+      <hr>
+      <div id="prey-num"></div>
+      <div id="pred-num"></div>
+      <p class="text-secondary small mt-2">Reinicia si una población desaparece.</p>
+      <hr>
+
+      <!-- Sliders -->
+      <div class="text-start">
+        <div class="mb-2">
+          <span id="prey-rep-display" class="param-label"></span>
+          <input id="prey-rep-input" type="range" min="0" max="1" step="0.1"
+                oninput="updateParams('prey-rep')" onchange="updateParams('prey-rep')" />
+        </div>
+        <!--<div class="mb-2">
+          <span id="prey-ded-display" class="param-label"></span>
+          <input id="prey-ded-input" type="range" min="0" max="1" step="0.1"
+                oninput="updateParams('prey-ded')" onchange="updateParams('prey-ded')" />
+        </div>-->
+        <div class="mb-2">
+          <span id="pred-rep-display" class="param-label"></span>
+          <input id="pred-rep-input" type="range" min="0" max="1" step="0.1"
+                oninput="updateParams('pred-rep')" onchange="updateParams('pred-rep')" />
+        </div>
+        <div class="mb-2">
+          <span id="pred-ded-display" class="param-label"></span>
+          <input id="pred-ded-input" type="range" min="0" max="1" step="0.1"
+                oninput="updateParams('pred-ded')" onchange="updateParams('pred-ded')" />
+        </div>
+        <div class="mb-2">
+          <span id="pred-req-display" class="param-label"></span>
+          <input id="pred-req-input" type="range" min="1" max="4" step="1"
+                oninput="updateParams('pred-req')" onchange="updateParams('pred-req')" />
         </div>
       </div>
-    </section>
+    </div>
+      </div>
+  </div>
+  </section>
+  <section class="d-flex justify-content-center align-items-center py-5">
+    <div class="card bg-secondary text-light border-0 shadow-lg rounded-4 p-4" style="max-width: 600px;">
+      <div class="card-body text-center">
+        <h4 class="card-title mb-3">🐹🦁 Cuyes y Pumas: Modelo Lotka–Volterra</h4>
+        <p class="card-text text-light-50">
+          Este modelo muestra la relación entre <strong>cuyes</strong> (presas de color verde) y 
+          <strong>pumas</strong> (depredadores de color rojo).  
+          Cuando los cuyes abundan, los pumas prosperan; pero si escasean, los pumas disminuyen.  
+          Así surgen ciclos naturales donde ambas poblaciones crecen y decrecen, 
+          revelando el <em>equilibrio ecológico</em> del ecosistema.
+        </p>
+      </div>
+    </div>
+  </section>
 
-    <footer class="bg-dark text-center py-3">
-        <div class="container">
-            <small class="">Autor: Diego Goñas. revisa mi repositorio</small>
-        </div>
-    </footer>
+  <footer class="bg-dark text-center py-3">
+      <div class="container">
+          <small class="">Autor: Diego Goñas. revisa mi repositorio</small>
+      </div>
+  </footer>
 
   <script src="../src/js/loktaVolterra.js"></script>
+  <script src="../src/js/component-loader.js"></script>
 </body>
 </html>
