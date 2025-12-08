@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juego de la Vida — Diego Goñas</title>
+  <!-- Bootstrap dark theme -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0b1220; --card:#0f1724; --muted:#9aa4b2; --accent:#0d6efd;
+    }
+    body{background:linear-gradient(180deg,#05060a 0%, #071021 100%); color:#e6eef6; font-family:Inter, system-ui, Arial, sans-serif}
+    canvas{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); display:block; width:100%; height:600px; border-radius:12px; box-shadow:0 8px 30px rgba(2,6,23,0.6);}
+    .param-label{display:block; color:var(--muted); font-size:0.95rem; margin-bottom:4px}
+    .controls .btn{min-width:110px}
+    .card-like{background:var(--card); border-radius:14px; padding:18px}
+    .small-muted{color:var(--muted); font-size:0.9rem}
+    .badge-ghost{background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted)}
+    @media(max-width:991px){ canvas{height:420px} }
+  </style>
+</head>
+
+<body>
+  <div data-component="header"></div>
+
+  <section class="py-3">
+    <div class="container">
+      <div class="row">
+        <!-- Canvas -->
+        <div class="col-lg-8 col-12 mb-3">
+          <canvas id="canvas"></canvas>
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <div>
+              <span class="badge bg-primary" id="generation-display">Generación: 0</span>
+              <span class="badge bg-success" id="alive-display">Vivas: 0</span>
+            </div>
+            <div>
+              <span class="badge badge-ghost" id="time-display">Velocidad: 8</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="col-lg-4 col-12 text-center">
+          <div class="card-like text-start">
+            <div class="d-grid gap-2 mb-2">
+              <button id="start-button" class="btn btn-success">Iniciar</button>
+              <button id="pause-button" class="btn btn-warning">Pausar</button>
+              <div class="d-flex gap-2">
+                <button id="step-button" class="btn btn-outline-light flex-fill">Paso</button>
+                <button id="clear-button" class="btn btn-danger flex-fill">Limpiar</button>
+              </div>
+              <button id="random-button" class="btn btn-secondary">Aleatorio</button>
+            </div>
+
+            <hr class="border-secondary">
+
+            <!-- Sliders y opciones -->
+            <label class="param-label">Velocidad (pasos por segundo)</label>
+            <input id="speed-input" type="range" min="1" max="30" value="8" />
+            <div class="d-flex justify-content-between small-muted mt-1">
+              <div>Tamaño de celda</div>
+              <div id="cell-size-label">10 px</div>
+            </div>
+            <input id="cell-size-input" type="range" min="6" max="24" value="10" />
+
+            <div class="mt-3">
+              <label class="form-label small-muted">Configuraciones rápidas</label>
+              <select id="preset-select" class="form-select">
+                <option value="">-- escoger --</option>
+                <option value="glider">Glider</option>
+                <option value="small-exploder">Small Exploder</option>
+                <option value="exploder">Exploder</option>
+                <option value="ten-cell-row">10-cell row</option>
+                <option value="light-weight-ship">Light-weight ship</option>
+              </select>
+            </div>
+
+            <div class="mt-3 small-muted">Haz clic o arrastra sobre el canvas para activar/desactivar celdas.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Descripción breve -->
+  <section class="d-flex justify-content-center align-items-center py-4">
+    <div class=" text-light border-0 shadow-lg rounded-4 p-4" style="max-width:900px; background:rgba(10,14,22,0.6)">
+      <div class="card-body">
+        <h4 class="card-title mb-2">Conway — Juego de la Vida</h4>
+        <p class="card-text text-light-50 small-muted">
+          Autómata celular clásico de Conway. Reglas:
+          <ul>
+            <li>Una celda viva con 2 o 3 vecinas sobrevive.</li>
+            <li>Una celda muerta con exactamente 3 vecinas nace.</li>
+            <li>En cualquier otro caso, la celda muere o permanece muerta.</li>
+          </ul>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-dark text-center py-3 mt-4">
+    <div class="container">
+      <small class="">Autor: Diego Goñas — Juego de la Vida</small>
+    </div>
+  </footer>
+
+<script>
+// ======= Juego de la Vida (Conway) - Implementación en canvas =======
+(() => {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Controles
+  const startBtn = document.getElementById('start-button');
+  const pauseBtn = document.getElementById('pause-button');
+  const stepBtn = document.getElementById('step-button');
+  const clearBtn = document.getElementById('clear-button');
+  const randomBtn = document.getElementById('random-button');
+  const speedInput = document.getElementById('speed-input');
+  const cellSizeInput = document.getElementById('cell-size-input');
+  const cellSizeLabel = document.getElementById('cell-size-label');
+  const genDisplay = document.getElementById('generation-display');
+  const aliveDisplay = document.getElementById('alive-display');
+  const timeDisplay = document.getElementById('time-display');
+  const presetSelect = document.getElementById('preset-select');
+
+  // Parámetros
+  let cellSize = parseInt(cellSizeInput.value, 10); // pixels
+  let cols = 0, rows = 0;
+  let grid = [];
+  let running = false;
+  let generation = 0;
+  let animFrame = null;
+  let lastStepTime = 0;
+  let interval = 1000 / parseInt(speedInput.value, 10);
+
+  // Inicializar canvas responsive
+  function resizeCanvas(){
+    const ratio = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width * ratio);
+    canvas.height = Math.floor(rect.height * ratio);
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+
+    cols = Math.floor(rect.width / cellSize);
+    rows = Math.floor(rect.height / cellSize);
+    ensureGridSize();
+    draw();
+  }
+
+  // Crear o ajustar la rejilla según cols/rows
+  function ensureGridSize(){
+    const newGrid = new Array(rows).fill(null).map(()=> new Array(cols).fill(0));
+    for(let r=0;r<Math.min(rows,grid.length);r++){
+      for(let c=0;c<Math.min(cols,grid[0]?.length||0);c++) newGrid[r][c] = grid[r][c];
+    }
+    grid = newGrid;
+  }
+
+  // Dibujar la rejilla
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const W = canvas.clientWidth, H = canvas.clientHeight;
+
+    // Fondo
+    ctx.fillStyle = 'rgba(255,255,255,0.01)';
+    ctx.fillRect(0,0,W,H);
+
+    // Dibujar celdas vivas
+    let alive = 0;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        if(grid[r][c]){
+          alive++;
+          ctx.fillStyle = '#28a745'; // verde
+          ctx.fillRect(c*cellSize+1, r*cellSize+1, cellSize-1, cellSize-1);
+        }
+      }
+    }
+
+    // Líneas de cuadrícula ligeras
+    ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+    ctx.beginPath();
+    for(let x=0;x<=cols;x++){
+      const px = x*cellSize + 0.5;
+      ctx.moveTo(px,0); ctx.lineTo(px,H);
+    }
+    for(let y=0;y<=rows;y++){
+      const py = y*cellSize + 0.5;
+      ctx.moveTo(0,py); ctx.lineTo(W,py);
+    }
+    ctx.stroke();
+
+    genDisplay.textContent = `Generación: ${generation}`;
+    aliveDisplay.textContent = `Vivas: ${alive}`;
+    timeDisplay.textContent = `Velocidad: ${speedInput.value}`;
+  }
+
+  // Contar vecinos
+  function countNeighbors(r,c){
+    let n=0;
+    for(let dr=-1;dr<=1;dr++){
+      for(let dc=-1;dc<=1;dc++){
+        if(dr===0 && dc===0) continue;
+        const rr = r+dr, cc = c+dc;
+        if(rr>=0 && rr<rows && cc>=0 && cc<cols) n += grid[rr][cc];
+      }
+    }
+    return n;
+  }
+
+  // Paso del autómata
+  function step(){
+    const next = new Array(rows).fill(null).map(()=> new Array(cols).fill(0));
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const n = countNeighbors(r,c);
+        if(grid[r][c]){
+          next[r][c] = (n===2 || n===3) ? 1 : 0;
+        } else {
+          next[r][c] = (n===3) ? 1 : 0;
+        }
+      }
+    }
+    grid = next;
+    generation++;
+    draw();
+  }
+
+  // Bucle de animación controlado por velocidad
+  function loop(ts){
+    if(!lastStepTime) lastStepTime = ts;
+    const elapsed = ts - lastStepTime;
+    if(elapsed >= interval){
+      step();
+      lastStepTime = ts;
+    }
+    if(running) animFrame = requestAnimationFrame(loop);
+  }
+
+  // Eventos de UI
+  startBtn.addEventListener('click', ()=>{
+    if(!running){ running = true; animFrame = requestAnimationFrame(loop); }
+  });
+  pauseBtn.addEventListener('click', ()=>{
+    running = false; if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; lastStepTime = 0;
+  });
+  stepBtn.addEventListener('click', ()=>{ if(!running) step(); });
+  clearBtn.addEventListener('click', ()=>{ grid = new Array(rows).fill(null).map(()=> new Array(cols).fill(0)); generation=0; draw(); });
+  randomBtn.addEventListener('click', ()=>{ for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) grid[r][c] = Math.random()<0.25?1:0; generation=0; draw(); });
+
+  speedInput.addEventListener('input', ()=>{ interval = 1000 / parseInt(speedInput.value,10); timeDisplay.textContent = `Velocidad: ${speedInput.value}`; });
+  cellSizeInput.addEventListener('input', ()=>{
+    cellSize = parseInt(cellSizeInput.value,10); cellSizeLabel.textContent = `${cellSize} px`;
+    resizeCanvas();
+  });
+
+  // Interacción con canvas: click y arrastre
+  let isPointerDown = false;
+  function pointerToCell(ev){
+    const rect = canvas.getBoundingClientRect();
+    const x = (ev.clientX || ev.touches?.[0]?.clientX) - rect.left;
+    const y = (ev.clientY || ev.touches?.[0]?.clientY) - rect.top;
+    const c = Math.floor(x / (rect.width/cols));
+    const r = Math.floor(y / (rect.height/rows));
+    return {r,c};
+  }
+
+  canvas.addEventListener('pointerdown', (e)=>{ isPointerDown = true; const {r,c} = pointerToCell(e); if(r>=0 && c>=0 && r<rows && c<cols) grid[r][c] = grid[r][c]?0:1; draw(); });
+  canvas.addEventListener('pointermove', (e)=>{ if(!isPointerDown) return; const {r,c} = pointerToCell(e); if(r>=0 && c>=0 && r<rows && c<cols) { grid[r][c] = 1; draw(); } });
+  window.addEventListener('pointerup', ()=>{ isPointerDown=false; });
+
+  // Presets
+  const presets = {
+    'glider': [[1,0,0],[0,1,1],[1,1,0]],
+    'small-exploder': [ [0,1,0],[1,1,1],[1,0,1],[0,1,0] ],
+    'exploder': [ [1,0,1,0,1],[1,0,1,0,1],[1,1,1,1,1],[1,0,1,0,1],[1,0,1,0,1] ],
+    'ten-cell-row': [ new Array(10).fill(1) ],
+    'light-weight-ship': [ [0,1,1,1,1],[1,0,0,0,1],[0,0,0,0,1],[1,0,0,1,0] ]
+  };
+  presetSelect.addEventListener('change', ()=>{
+    const val = presetSelect.value; if(!val) return;
+    // colocar en el centro
+    const shape = presets[val];
+    const h = shape.length, w = shape[0].length;
+    const r0 = Math.floor((rows-h)/2), c0 = Math.floor((cols-w)/2);
+    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) grid[r][c]=0;
+    for(let r=0;r<h;r++) for(let c=0;c<w;c++) grid[r0+r][c0+c] = shape[r][c] ? 1 : 0;
+    generation = 0; draw();
+  });
+
+  // Manejo de resize
+  const resizeObserver = new ResizeObserver(()=> resizeCanvas());
+  resizeObserver.observe(canvas.parentElement);
+  window.addEventListener('resize', ()=> resizeCanvas());
+
+  // Inicializar rejilla y canvas
+  function init(){
+    cellSizeLabel.textContent = `${cellSize} px`;
+    const rect = canvas.getBoundingClientRect();
+    cols = Math.floor(rect.width / cellSize);
+    rows = Math.floor(rect.height / cellSize) || 40;
+    grid = new Array(rows).fill(null).map(()=> new Array(cols).fill(0));
+    interval = 1000 / parseInt(speedInput.value,10);
+    draw();
+  }
+
+  // Primero, asegurar un tamaño razonable del canvas si está sin dimensiones
+  function ensureCanvasHeight(){
+    const style = getComputedStyle(canvas);
+    if(!canvas.clientHeight || canvas.clientHeight < 100){ canvas.style.height = '600px'; }
+  }
+  ensureCanvasHeight();
+  init();
+  resizeCanvas();
+
+})();
+</script>
+</body>
+</html>

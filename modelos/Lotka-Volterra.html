@@ -8,68 +8,73 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../src/css/loktaVolterra.css">
 
+  <!-- MathJax para mostrar fórmulas -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+
+  </style>
 </head>
 
 <body>
   <div data-component="header"></div>
 
   <section class="py-3">
-  <div class="container">
+    <div class="container">
       <div class="row">
-    <!-- Canvas -->
-    <div class="col-lg-8 col-12 mb-3">
-      <canvas id="canvas"></canvas>
-      <div class="text-center mt-2">
-        <span class="badge bg-primary" id="time-display">Tiempo: 0.0</span>
-      </div>
-    </div>
+        <!-- Canvas -->
+        <div class="col-lg-8 col-12 mb-3">
+          <canvas id="canvas"></canvas>
+          <div class="text-center mt-2">
+            <span class="badge bg-primary" id="time-display">Tiempo: 0.0</span>
+          </div>
+        </div>
 
-    <!-- Controles -->
-    <div class="col-lg-4 col-12 text-center">
-      <button id="start-button" class="btn btn-success">Iniciar</button>
-      <button id="pause-button" class="btn btn-warning me-2" onclick="pauseToggle()">Pausar</button>
-      <button class="btn btn-danger" onclick="location.reload()">Reiniciar</button>
-      <hr>
-      <div id="prey-num"></div>
-      <div id="pred-num"></div>
-      <p class="text-secondary small mt-2">Reinicia si una población desaparece.</p>
-      <hr>
+        <!-- Controles -->
+        <div class="col-lg-4 col-12 text-center">
+          <button id="start-button" class="btn btn-success">Iniciar</button>
+          <button id="pause-button" class="btn btn-warning me-2" onclick="pauseToggle()">Pausar</button>
+          <button class="btn btn-danger" onclick="location.reload()">Reiniciar</button>
+          <hr>
+          <div id="prey-num"></div>
+          <div id="pred-num"></div>
+          <p class="text-secondary small mt-2">Reinicia si una población desaparece.</p>
+          <hr>
 
-      <!-- Sliders -->
-      <div class="text-start">
-        <div class="mb-2">
-          <span id="prey-rep-display" class="param-label"></span>
-          <input id="prey-rep-input" type="range" min="0" max="1" step="0.1"
-                oninput="updateParams('prey-rep')" onchange="updateParams('prey-rep')" />
-        </div>
-        <!--<div class="mb-2">
-          <span id="prey-ded-display" class="param-label"></span>
-          <input id="prey-ded-input" type="range" min="0" max="1" step="0.1"
-                oninput="updateParams('prey-ded')" onchange="updateParams('prey-ded')" />
-        </div>-->
-        <div class="mb-2">
-          <span id="pred-rep-display" class="param-label"></span>
-          <input id="pred-rep-input" type="range" min="0" max="1" step="0.1"
-                oninput="updateParams('pred-rep')" onchange="updateParams('pred-rep')" />
-        </div>
-        <div class="mb-2">
-          <span id="pred-ded-display" class="param-label"></span>
-          <input id="pred-ded-input" type="range" min="0" max="1" step="0.1"
-                oninput="updateParams('pred-ded')" onchange="updateParams('pred-ded')" />
-        </div>
-        <div class="mb-2">
-          <span id="pred-req-display" class="param-label"></span>
-          <input id="pred-req-input" type="range" min="1" max="4" step="1"
-                oninput="updateParams('pred-req')" onchange="updateParams('pred-req')" />
+          <!-- Sliders -->
+          <div class="text-start">
+            <div class="mb-2">
+              <span id="prey-rep-display" class="param-label"></span>
+              <input id="prey-rep-input" type="range" min="0" max="1" step="0.1"
+                    oninput="updateParams('prey-rep')" onchange="updateParams('prey-rep')" />
+            </div>
+            <div class="mb-2">
+              <span id="pred-rep-display" class="param-label"></span>
+              <input id="pred-rep-input" type="range" min="0" max="1" step="0.1"
+                    oninput="updateParams('pred-rep')" onchange="updateParams('pred-rep')" />
+            </div>
+            <div class="mb-2">
+              <span id="pred-ded-display" class="param-label"></span>
+              <input id="pred-ded-input" type="range" min="0" max="1" step="0.1"
+                    oninput="updateParams('pred-ded')" onchange="updateParams('pred-ded')" />
+            </div>
+            <div class="mb-2">
+              <span id="pred-req-display" class="param-label"></span>
+              <input id="pred-req-input" type="range" min="1" max="4" step="1"
+                    oninput="updateParams('pred-req')" onchange="updateParams('pred-req')" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
-      </div>
-  </div>
   </section>
+
+  <!-- Tarjeta descriptiva -->
   <section class="d-flex justify-content-center align-items-center py-5">
-    <div class="card bg-secondary text-light border-0 shadow-lg rounded-4 p-4" style="max-width: 600px;">
-      <div class="card-body text-center">
+    <div class=" text-light border-0 shadow-lg rounded-4 p-4" style="max-width: 600px;">
+      <div class="card-body">
         <h4 class="card-title mb-3">🐹🦁 Cuyes y Pumas: Modelo Lotka–Volterra</h4>
         <p class="card-text text-light-50">
           Este modelo muestra la relación entre <strong>cuyes</strong> (presas de color verde) y 
@@ -82,10 +87,46 @@
     </div>
   </section>
 
+  <!-- 📘 Explicación teórica -->
+  <section class="math-section">
+    <h2 class="text-center mb-4">Sobre el modelo y las ecuaciones</h2>
+    <p>En el intento de matematizar el equilibrio natural. Volterra y Lotka usaron las siguientes herramientas de ecuaciones diferenciales, muy comunes en física, y las trasladaron al campo biológico. Aquí les presento el modelo clásico:
+</p>
+    <p class="text-center fs-4">
+      \[
+      \begin{cases}
+      \dfrac{dP}{dt} = aP - bPD \\\\[6pt]
+      \dfrac{dD}{dt} = -cD + dPD
+      \end{cases}
+      \]
+    </p>
+
+    <h3 class="mt-4">Variables principales</h3>
+    <ul class="fs-5">
+      <li><b>P</b>: número de <b>presas</b> (por ejemplo, cuyes).</li>
+      <li><b>D</b>: número de <b>depredadores</b> (por ejemplo, pumas).</li>
+    </ul>
+
+    <h3 class="mt-4">Parámetros del sistema</h3>
+    <ul class="fs-5">
+      <li><b>a</b>: tasa de reproducción de las presas.</li>
+      <li><b>b</b>: tasa de depredación (eficiencia de caza).</li>
+      <li><b>c</b>: tasa de muerte natural de los depredadores.</li>
+      <li><b>d</b>: eficiencia con la que los depredadores se reproducen al alimentarse.</li>
+    </ul>
+
+    <div class="alert mt-4">
+      <b>Interpretación:</b><li>Las presas crecen exponencialmente si no hay depredadores</li>
+      <li>Los depredadores disminuyen si no tienen presas</li>
+      <li>Pero cuando interactúan, ambos se afectan: los depredadores crecen al comer presas, y las presas disminuyen</li>
+      <li><b>Esto es un sistema dinámico no lineal </b></li>
+    </div>
+  </section>
+
   <footer class="bg-dark text-center py-3">
-      <div class="container">
-          <small class="">Autor: Diego Goñas. revisa mi repositorio</small>
-      </div>
+    <div class="container">
+      <small class="">Autor: Diego Goñas. revisa mi repositorio</small>
+    </div>
   </footer>
 
   <script src="../src/js/loktaVolterra.js"></script>
