@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../src/css/calculoDiferencial.css">
+
+  <title>Derivative Engine (JS)</title>
+</head>
+<body>
+  <div data-component="header"></div>
+
+  <div class="container-fluid p-4">
+
+
+    <div class="row">
+      <!-- CONTROLES -->
+      <div class="col-md-3">
+        <div class="mb-3">
+          <label class="control-label">Función</label>
+          <select id="functionSelect" class="form-select form-select-sm">
+            <option value="x2">f(x) = x²</option>
+            <option value="x3">f(x) = x³</option>
+            <option value="sin">f(x) = sin(x)</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="control-label">Punto x₀</label>
+          <input type="range" id="x0Slider" min="-5" max="5" step="0.1" value="1" />
+          <div class="value-box mt-1" id="x0Value"></div>
+        </div>
+
+        <div class="mb-3">
+          <label class="control-label">Incremento h</label>
+          <input type="range" id="hSlider" min="0.001" max="1" step="0.001" value="0.001" />
+          <div class="value-box mt-1" id="hValue"></div>
+        </div>
+
+        <div class="mb-3">
+          <button id="animateBtn" class="btn btn-sm btn-outline-light w-100">
+            h → 0
+          </button>
+          <button id="toggleTangentBtn" class="btn btn-sm btn-outline-light w-100 mt-2">
+            Mostrar recta tangente
+          </button>
+        </div>
+
+        <div class="mt-4">
+          <div class="control-label">Derivada aproximada</div>
+          <div class="value-box mt-1" id="derivativeValue"></div>
+        </div>
+      </div>
+
+      <!-- CANVAS -->
+      <div class="col-md-9">
+        <canvas id="canvas" width="900" height="500"></canvas>
+      </div>
+    </div>
+  </div>
+  
+
+<!-- 🧠 Problema matemático central -->
+<section class="d-flex justify-content-center align-items-center py-5">
+  <div class="text-light border-0 shadow-lg rounded-4 p-4" style="max-width: 650px;">
+    <div class="card-body">
+      <h4 class="card-title mb-3">🧠 El problema matemático central</h4>
+      <p class="card-text text-light-50">
+        En <strong>cálculo diferencial</strong> buscamos responder una pregunta fundamental:
+        <br><br>
+        <em>¿Cómo cambia una función en un punto específico?</em>
+        <br><br>
+        De forma más formal, dada una función
+        <span class="fw-semibold">f : ℝ → ℝ</span>,
+        queremos conocer su <strong>tasa de cambio instantánea</strong> en un punto
+        <span class="fw-semibold">x₀</span>.
+        <br><br>
+        Este problema aparece en física, economía, biología y computación cuando estudiamos
+        <em>movimiento, crecimiento, optimización o variación</em>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 📐 Recta secante -->
+<section class="d-flex justify-content-center align-items-center py-5">
+  <div class="text-light border-0 shadow-lg rounded-4 p-4" style="max-width: 650px;">
+    <div class="card-body">
+      <h4 class="card-title mb-3">📐 La recta secante: primera aproximación</h4>
+      <p class="card-text text-light-50">
+        Para aproximar cómo cambia una función, tomamos dos puntos de su gráfica:
+        <br><br>
+        <span class="fw-semibold">(x₀, f(x₀))</span> y
+        <span class="fw-semibold">(x₀ + h, f(x₀ + h))</span>.
+        <br><br>
+        La recta que une estos puntos se llama <strong>recta secante</strong>.
+        Su pendiente es:
+        <br><br>
+        <span class="fw-semibold">
+          m<sub>sec</sub> = [ f(x₀ + h) − f(x₀) ] / h
+        </span>
+        <br><br>
+        Esta pendiente mide el <strong>cambio promedio</strong> de la función en el intervalo
+        <span class="fw-semibold">[x₀, x₀ + h]</span>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 🎚️ Interpretación del parámetro h -->
+<section class="d-flex justify-content-center align-items-center py-5">
+  <div class="text-light border-0 shadow-lg rounded-4 p-4" style="max-width: 650px;">
+    <div class="card-body">
+      <h4 class="card-title mb-3">🎚️ El papel del parámetro h</h4>
+      <p class="card-text text-light-50">
+        En el simulador, el parámetro <strong>h</strong> controla la distancia entre los dos puntos:
+        <br><br>
+        • Cuando <strong>h es grande</strong>, la recta secante es una mala aproximación.<br>
+        • Cuando <strong>h disminuye</strong>, la aproximación mejora.<br>
+        • Cuando <strong>h → 0</strong>, la secante se transforma visualmente.
+        <br><br>
+        La animación muestra cómo la recta secante <em>gira y converge</em> hacia una recta límite.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 🔬 Definición de derivada -->
+<section class="d-flex justify-content-center align-items-center py-5">
+  <div class="text-light border-0 shadow-lg rounded-4 p-4" style="max-width: 650px;">
+    <div class="card-body">
+      <h4 class="card-title mb-3">🔬 La derivada como límite</h4>
+      <p class="card-text text-light-50">
+        La <strong>derivada</strong> no es una recta secante.
+        Es el <strong>límite</strong> de las pendientes de las secantes cuando el intervalo se hace infinitamente pequeño.
+        <br><br>
+        Definición formal:
+        <br><br>
+        <span class="fw-semibold">
+          f′(x₀) = lim<sub>h → 0</sub> [ f(x₀ + h) − f(x₀) ] / h
+        </span>
+        <br><br>
+        Este límite define la <strong>tasa de cambio instantánea</strong> de la función en el punto x₀.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 📏 Recta tangente -->
+<section class="d-flex justify-content-center align-items-center py-5">
+  <div class="text-light border-0 shadow-lg rounded-4 p-4" style="max-width: 650px;">
+    <div class="card-body">
+      <h4 class="card-title mb-3">📏 La recta tangente</h4>
+      <p class="card-text text-light-50">
+        La recta tangente es la <strong>recta límite</strong> a la que convergen las secantes.
+        <br><br>
+        • Toca la curva en un solo punto<br>
+        • Tiene la misma pendiente que la función en ese punto<br>
+        • Es la mejor aproximación lineal local de la función
+        <br><br>
+        Su ecuación es:
+        <br><br>
+        <span class="fw-semibold">
+          y = f(x₀) + f′(x₀)(x − x₀)
+        </span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 🧮 Derivada numérica -->
+<section class="d-flex justify-content-center align-items-center py-5">
+  <div class="text-light border-0 shadow-lg rounded-4 p-4" style="max-width: 650px;">
+    <div class="card-body">
+      <h4 class="card-title mb-3">🧮 Derivada numérica y computación</h4>
+      <p class="card-text text-light-50">
+        Una computadora no puede calcular límites infinitos.
+        Por eso utiliza una <strong>aproximación numérica</strong>:
+        <br><br>
+        <span class="fw-semibold">
+          f′(x₀) ≈ [ f(x₀ + ε) − f(x₀) ] / ε
+        </span>
+        <br><br>
+        donde <strong>ε</strong> es un número muy pequeño.
+        <br><br>
+        En este simulador se usa ε = 0.0001, suficiente para una
+        <em>aproximación precisa y visualmente estable</em>.
+        <br><br>
+        Esto conecta el cálculo diferencial con el
+        <strong>cálculo numérico y la ciencia computacional</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-dark text-center py-3">
+    <div class="container">
+      <small>Autor: Diego Goñas — Proyecto <strong>CompuLab+</strong></small>
+    </div>
+</footer>
+
+
+<script src="../src/js/calculoDiferncial.js"></script>
+<script src="../src/js/component-loader.js"></script>
+</body>
+</html>
