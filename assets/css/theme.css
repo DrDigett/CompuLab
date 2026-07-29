@@ -1,0 +1,113 @@
+:root {
+  --bg-primary: #0b0c0d;
+  --bg-secondary: #111214;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-card-hover: rgba(255, 255, 255, 0.06);
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0a6;
+  --text-muted: #6c7278;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-card: rgba(255, 255, 255, 0.04);
+  --accent: #0d6efd;
+  --accent-hover: #0b5ed7;
+  --font-sans: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius);
+}
+
+.card-themed {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius);
+}
+
+.text-secondary-custom {
+  color: var(--text-secondary);
+}
+
+.text-muted-custom {
+  color: var(--text-muted);
+}
+
+.badge-skill {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ededed;
+  border: 1px solid var(--border-subtle);
+}
+
+.progress {
+  background-color: rgba(255, 255, 255, 0.03);
+  height: 10px;
+  border-radius: 6px;
+}
+
+.progress-bar {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.btn-outline-light {
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+}
+
+.btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+footer {
+  color: var(--text-muted);
+}
+
+.hero-section {
+  background: linear-gradient(180deg, #0f1115 0%, var(--bg-primary) 100%);
+  border-radius: var(--radius);
+}
+
+.simulation-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.simulation-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.section-divider {
+  border-color: var(--border-subtle);
+  opacity: 0.3;
+}

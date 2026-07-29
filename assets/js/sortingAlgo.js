@@ -221,7 +221,8 @@ function setAlgorithm(algo) {
   currentAlgorithm = algo;
 
   // Definir archivo HTML con la descripción del algoritmo
-  const file = `../src/pages/${algo}.html`;
+  const root = window.ROOT || '.';
+  const file = `${root}/pages/${algo}.html`;
 
   // Cargar y mostrar la descripción del algoritmo
   fetch(file)
